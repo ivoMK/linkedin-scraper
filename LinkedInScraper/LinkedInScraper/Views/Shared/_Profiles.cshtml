@@ -1,0 +1,95 @@
+﻿@model GetProfilesResponse;
+
+@if (Model.IsSucessful)
+{
+    <ul id="ulProfiles" class="list-group">
+        @foreach (var profileInfo in Model.ProfileInfos)
+        {
+            <li class="list-group-item">
+                <input id="@profileInfo.Id" type="checkbox">
+                <img class="rounded-circle" src="@profileInfo.ImageUrl" />
+                @profileInfo.Name
+                <button class="btn btn-secondary" val="@profileInfo.Id" onclick="sendMessage($(this))"><i class="fa fa-commenting-o"></i> Send Message</button>
+                <button class="btn btn-secondary" val="@profileInfo.Id" onclick="viewProfile($(this))"><i class="fa fa-eye"></i> View Profile</button>
+            </li>
+        }
+    </ul>
+    <div class="row">
+        <div class="col-sm">
+            <textarea class="form-control" id="txtMessage"></textarea>
+        </div>
+        <div class="col-sm">
+            <button class="btn btn-primary" id="btnSendMessageSelected"><i class="fa fa-commenting-o"></i> Send Message to Selected Profiles</button>
+        </div>
+        <div class="col-sm">
+            <button class="btn btn-primary" id="btnViewProfileSelected"><i class="fa fa-eye"></i> View Selected Profiles</button>
+        </div>
+    </div>
+
+}
+else
+{
+    <span>@Model.ErrorMessage</span>
+}
+
+<script>
+    $('#btnSendMessageSelected').click(function () {
+        var message = $('#txtMessage').val();
+        if (!message) {
+            alert("Enter Message");
+            $('#txtMessage').focus();
+            return;
+        }
+        var ids = [];
+        $('input[type=checkbox]:checked').each(function () {
+            ids.push($(this).attr("id"));
+        });
+
+        var url = '@Url.Action("SendMessage", "Home")';
+        var item = {
+            "profileIds": ids, "message": message
+        };
+        $.ajax({
+            url: url,
+            type: "post",
+            data: {
+                request: item
+            },
+            success: function (data) {
+                var json = JSON.parse(data);
+                if (!json.IsSuccess) {
+                    alert(json.ErrorMessage);
+                }
+            },
+            error: function () {
+
+            }
+        });
+    })
+
+    $('#btnViewProfileSelected').click(function () {        
+        var ids = [];
+        $('input[type=checkbox]:checked').each(function () {
+            ids.push($(this).attr("id"));
+        });
+
+        var url = '@Url.Action("ViewProfile", "Home")';
+        $.ajax({
+            url: url,
+            type: "post",
+            data: {
+                userprofileIds: ids
+            },
+            success: function (data) {
+                var json = JSON.parse(data);
+                if (!json.IsSuccess)
+                {
+                    alert(json.ErrorMessage);
+                }
+            },
+            error: function () {
+
+            }
+        });
+    })
+</script>

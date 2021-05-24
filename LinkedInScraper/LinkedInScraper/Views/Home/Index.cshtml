@@ -1,0 +1,75 @@
+﻿@model string;
+@{
+    ViewData["Title"] = "Home Page";
+    ViewData["Username"] = Model;
+}
+<div class="container">
+    <div class="row">
+
+        <button id="profiles" class="btn btn-primary">Get User Profiles</button>
+    </div>
+    <div class="row">
+        <div id="divProfiles">
+        </div>
+    </div>
+</div>
+<script>
+    $('#profiles').click(function () {
+        var url = '@Url.Action("GetProfiles", "Home")';
+        $('#divProfiles').load(url);
+    })
+
+    function sendMessage(comp) {
+
+        var message = $('#txtMessage').val();
+        if (!message) {
+            alert("Enter Message");
+            $('#txtMessage').focus();
+            return;
+        }
+        var url = '@Url.Action("SendMessage", "Home")';
+        var item = {
+            "profileIds": [comp.attr("val")], "message": message
+        };
+        $.ajax({
+            url: url,
+            type: "post",
+            data: {
+                request: item
+            },
+            success: function (data) {
+                var json = JSON.parse(data);
+                if (!json.IsSuccess) {
+                    alert(json.ErrorMessage);
+                }
+            },
+            error: function () {
+
+            }
+        });
+    }
+
+     function viewProfile(comp) {
+        var url = '@Url.Action("ViewProfile", "Home")';
+         $.ajax({
+            url: url,
+            type: "post",
+            data: {
+                userprofileIds: [comp.attr("val")]
+            },
+             success: function (data) {
+                 var json = JSON.parse(data);
+                 if (!json.IsSuccess) {
+                     alert(json.ErrorMessage);
+                 }
+
+            },
+            error: function () {
+
+            }
+        });
+    }
+
+  
+
+</script>
